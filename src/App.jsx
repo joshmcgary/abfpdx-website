@@ -168,8 +168,10 @@ function SermonDiscovery() {
   const [topics, setTopics] = useState(null)
   const [filter, setFilter] = useState('')
   const [error, setError] = useState(false)
-  const loadTopics = (event) => {
-    if (!event.currentTarget.open || topics || error) return
+  const [indexOpen, setIndexOpen] = useState(false)
+  const toggleIndex = () => {
+    setIndexOpen(open => !open)
+    if (indexOpen || topics || error) return
     fetch(asset('teaching/topics.json'))
       .then(response => response.ok ? response.json() : Promise.reject(new Error('Index unavailable')))
       .then(data => setTopics(data.entries || []))
@@ -180,8 +182,10 @@ function SermonDiscovery() {
   return <section className="sermon-discovery" aria-labelledby="sermon-discovery-title">
     <div className="sermon-discovery-inner">
       <div className="sermon-discovery-heading"><p className="section-label">Explore the teaching archive</p><h2 id="sermon-discovery-title">Find a sermon.</h2><p>Search the teaching by a theme, Scripture passage, question, or phrase.</p></div>
-      <form className="studios-sermon-search" role="search" action="https://teachings.abfpdx.org/" method="get"><label htmlFor="home-sermon-search">Search ABF sermons</label><div><input id="home-sermon-search" name="q" type="search" placeholder="A theme, Bible passage, or question" required/><button type="submit">Search sermons <span aria-hidden="true">&gt;</span></button></div><small>Searches sermon titles, wikis, Scripture references, and transcripts.</small></form>
-      <details className="home-topic-index" onToggle={loadTopics}><summary>Browse themes &amp; subjects <span>{topics ? `${topics.length} indexed topics` : 'Open index'}</span></summary><div className="home-topic-content"><label htmlFor="home-topic-filter">Filter the subject index</label><input id="home-topic-filter" type="search" value={filter} onChange={event => setFilter(event.target.value)} placeholder="Find a theme or subject"/>{error ? <p>The index could not load. <a href="https://teachings.abfpdx.org/">Browse it in the teaching archive.</a></p> : topics ? <><p>{visibleTopics.length} {visibleTopics.length === 1 ? 'subject' : 'subjects'} shown</p><div className="home-topic-list">{visibleTopics.map(item => <a key={item.label} href={`https://teachings.abfpdx.org/?q=${encodeURIComponent(item.label)}`}>{item.label}<small>{item.count}</small></a>)}</div></> : <p>Loading the subject index…</p>}</div></details>
+      <div className={`sermon-search-combo${indexOpen ? ' is-open' : ''}`}>
+        <div className="sermon-search-bar"><form className="studios-sermon-search" role="search" action="https://teachings.abfpdx.org/" method="get"><input id="home-sermon-search" name="q" type="search" aria-label="Search ABF sermons" placeholder="Search sermons by theme, Scripture, or question" required/><button type="submit" aria-label="Search sermons" title="Search sermons">⌕</button></form><button className="sermon-index-toggle" type="button" aria-label={indexOpen ? 'Collapse theme and subject index' : 'Expand theme and subject index'} aria-expanded={indexOpen} aria-controls="home-topic-content" onClick={toggleIndex} title={indexOpen ? 'Collapse subject index' : 'Expand subject index'}><span aria-hidden="true">⌄</span></button></div>
+        {indexOpen && <div className="home-topic-content" id="home-topic-content"><div className="home-topic-heading"><strong>Browse themes &amp; subjects</strong><span>{topics ? `${topics.length} indexed topics` : 'Loading index'}</span></div><label htmlFor="home-topic-filter">Filter the subject index</label><input id="home-topic-filter" type="search" value={filter} onChange={event => setFilter(event.target.value)} placeholder="Find a theme or subject"/>{error ? <p>The index could not load. <a href="https://teachings.abfpdx.org/">Browse it in the teaching archive.</a></p> : topics ? <><p>{visibleTopics.length} {visibleTopics.length === 1 ? 'subject' : 'subjects'} shown</p><div className="home-topic-list">{visibleTopics.map(item => <a key={item.label} href={`https://teachings.abfpdx.org/?q=${encodeURIComponent(item.label)}`}>{item.label}<small>{item.count}</small></a>)}</div></> : <p>Loading the subject index…</p>}</div>}
+      </div>
     </div>
   </section>
 }
