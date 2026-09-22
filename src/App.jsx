@@ -217,6 +217,7 @@ function App() {
         <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
         <a href="#beliefs" onClick={() => setMenuOpen(false)}>Beliefs</a>
         <a href="#people" onClick={() => setMenuOpen(false)}>People</a>
+        <a href="https://teachings.abfpdx.org/" onClick={() => setMenuOpen(false)}>Teachings</a>
         <a href="#connect" onClick={() => setMenuOpen(false)}>Connect</a>
         <a className="nav-feature" href="https://www.youtube.com/@abfpdx" target="_blank" rel="noreferrer">Watch ABF <Arrow /></a>
       </nav>
