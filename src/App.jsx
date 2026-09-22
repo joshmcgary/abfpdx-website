@@ -166,25 +166,28 @@ function BeliefsSection() {
 
 function SermonDiscovery() {
   const [topics, setTopics] = useState(null)
+  const [coverage, setCoverage] = useState(null)
   const [filter, setFilter] = useState('')
   const [error, setError] = useState(false)
   const [indexOpen, setIndexOpen] = useState(false)
   const toggleIndex = () => {
     setIndexOpen(open => !open)
     if (indexOpen || topics || error) return
-    fetch(asset('teaching/topics.json'))
-      .then(response => response.ok ? response.json() : Promise.reject(new Error('Index unavailable')))
-      .then(data => setTopics(data.entries || []))
+    Promise.all(['teaching/topics.json', 'teaching/topic-coverage.json'].map(path => fetch(asset(path))
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('Index unavailable')))))
+      .then(([data, counts]) => { setTopics(data.entries || []); setCoverage(counts) })
       .catch(() => setError(true))
   }
   const visibleTopics = topics?.filter(item => item.label.toLowerCase().includes(filter.trim().toLowerCase())) || []
+  const requestedSubject = filter.trim()
+  const recordingCount = coverage?.[requestedSubject.toLowerCase()]
 
   return <section className="sermon-discovery" aria-labelledby="sermon-discovery-title">
     <div className="sermon-discovery-inner">
       <div className="sermon-discovery-heading"><p className="section-label">Explore the teaching archive</p><h2 id="sermon-discovery-title">Find a sermon.</h2><p>Search the teaching by a theme, Scripture passage, question, or phrase.</p></div>
       <div className={`sermon-search-combo${indexOpen ? ' is-open' : ''}`}>
         <div className="sermon-search-bar"><form className="studios-sermon-search" role="search" action="https://teachings.abfpdx.org/" method="get"><input id="home-sermon-search" name="q" type="search" aria-label="Search ABF sermons" placeholder="Search sermons by theme, Scripture, or question" required/><button type="submit" aria-label="Search sermons" title="Search sermons">⌕</button></form><button className="sermon-index-toggle" type="button" aria-label={indexOpen ? 'Collapse theme and subject index' : 'Expand theme and subject index'} aria-expanded={indexOpen} aria-controls="home-topic-content" onClick={toggleIndex} title={indexOpen ? 'Collapse subject index' : 'Expand subject index'}><span aria-hidden="true">⌄</span></button></div>
-        {indexOpen && <div className="home-topic-content" id="home-topic-content"><div className="home-topic-heading"><strong>Browse themes &amp; subjects</strong><span>{topics ? `${topics.length} indexed topics` : 'Loading index'}</span></div><label htmlFor="home-topic-filter">Filter the subject index</label><input id="home-topic-filter" type="search" value={filter} onChange={event => setFilter(event.target.value)} placeholder="Find a theme or subject"/>{error ? <p>The index could not load. <a href="https://teachings.abfpdx.org/">Browse it in the teaching archive.</a></p> : topics ? <><p>{visibleTopics.length} {visibleTopics.length === 1 ? 'subject' : 'subjects'} shown</p><div className="home-topic-list">{visibleTopics.map(item => <a key={item.label} href={`https://teachings.abfpdx.org/?q=${encodeURIComponent(item.label)}`}>{item.label}<small>{item.count}</small></a>)}</div></> : <p>Loading the subject index…</p>}</div>}
+        {indexOpen && <div className="home-topic-content" id="home-topic-content"><div className="home-topic-heading"><strong>Browse themes &amp; subjects</strong><span>{topics ? `${topics.length} curated wiki labels` : 'Loading index'}</span></div><label htmlFor="home-topic-filter">Filter the subject index</label><input id="home-topic-filter" type="search" value={filter} onChange={event => setFilter(event.target.value)} placeholder="Find a theme or subject"/>{error ? <p>The index could not load. <a href="https://teachings.abfpdx.org/">Browse it in the teaching archive.</a></p> : topics ? <>{requestedSubject && <a className="home-topic-search-all" href={`https://teachings.abfpdx.org/?q=${encodeURIComponent(requestedSubject)}`}><strong>Search all sermons for “{requestedSubject}”</strong><span>{recordingCount ? `${recordingCount} recordings contain this word in catalogue text or transcripts` : 'Search wiki entries and transcripts, not just index labels'} ↗</span></a>}<p>{visibleTopics.length} curated {visibleTopics.length === 1 ? 'label' : 'labels'} match{visibleTopics.length === 1 ? 'es' : ''}. The subject index is not the full sermon search.</p><div className="home-topic-list">{visibleTopics.map(item => <a key={item.label} href={`https://teachings.abfpdx.org/?q=${encodeURIComponent(item.label)}`}>{item.label}<small>{item.count}</small></a>)}</div></> : <p>Loading the subject index…</p>}</div>}
       </div>
     </div>
   </section>
