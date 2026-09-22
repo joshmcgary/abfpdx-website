@@ -164,6 +164,28 @@ function BeliefsSection() {
   </section>
 }
 
+function SermonDiscovery() {
+  const [topics, setTopics] = useState(null)
+  const [filter, setFilter] = useState('')
+  const [error, setError] = useState(false)
+  const loadTopics = (event) => {
+    if (!event.currentTarget.open || topics || error) return
+    fetch(asset('teaching/topics.json'))
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('Index unavailable')))
+      .then(data => setTopics(data.entries || []))
+      .catch(() => setError(true))
+  }
+  const visibleTopics = topics?.filter(item => item.label.toLowerCase().includes(filter.trim().toLowerCase())) || []
+
+  return <section className="sermon-discovery" aria-labelledby="sermon-discovery-title">
+    <div className="sermon-discovery-inner">
+      <div className="sermon-discovery-heading"><p className="section-label">Explore the teaching archive</p><h2 id="sermon-discovery-title">Find a sermon.</h2><p>Search the teaching by a theme, Scripture passage, question, or phrase.</p></div>
+      <form className="studios-sermon-search" role="search" action="https://teachings.abfpdx.org/" method="get"><label htmlFor="home-sermon-search">Search ABF sermons</label><div><input id="home-sermon-search" name="q" type="search" placeholder="A theme, Bible passage, or question" required/><button type="submit">Search sermons <span aria-hidden="true">&gt;</span></button></div><small>Searches sermon titles, wikis, Scripture references, and transcripts.</small></form>
+      <details className="home-topic-index" onToggle={loadTopics}><summary>Browse themes &amp; subjects <span>{topics ? `${topics.length} indexed topics` : 'Open index'}</span></summary><div className="home-topic-content"><label htmlFor="home-topic-filter">Filter the subject index</label><input id="home-topic-filter" type="search" value={filter} onChange={event => setFilter(event.target.value)} placeholder="Find a theme or subject"/>{error ? <p>The index could not load. <a href="https://teachings.abfpdx.org/">Browse it in the teaching archive.</a></p> : topics ? <><p>{visibleTopics.length} {visibleTopics.length === 1 ? 'subject' : 'subjects'} shown</p><div className="home-topic-list">{visibleTopics.map(item => <a key={item.label} href={`https://teachings.abfpdx.org/?q=${encodeURIComponent(item.label)}`}>{item.label}<small>{item.count}</small></a>)}</div></> : <p>Loading the subject index…</p>}</div></details>
+    </div>
+  </section>
+}
+
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [installPrompt, setInstallPrompt] = useState(null)
@@ -224,8 +246,10 @@ function App() {
           ].map(({ list, video }, index) => <div className="video-column" key={list}><iframe src={video ? `https://www.youtube-nocookie.com/embed/${video}?list=${list}&autoplay=1&mute=1&controls=0&loop=1&playsinline=1&rel=0&modestbranding=1` : `https://www.youtube-nocookie.com/embed/videoseries?list=${list}&autoplay=1&mute=1&controls=0&loop=1&playsinline=1&rel=0&modestbranding=1&index=${index}`} title={`ABF playlist background ${index + 1}`} allow="autoplay; encrypted-media; picture-in-picture" tabIndex="-1"/></div>)}
         </div>
         <div className="studios-shade" aria-hidden="true"/>
-        <div className="studios-content"><p className="section-label">Watch · Learn · Explore</p><h2>Faith for the whole week.</h2><p>Watch sermons, teaching, commentary, and original video from the ABF community on our official YouTube channel.</p><form className="studios-sermon-search" role="search" action="https://teachings.abfpdx.org/" method="get"><label htmlFor="home-sermon-search">Search ABF sermons</label><div><input id="home-sermon-search" name="q" type="search" placeholder="A theme, Bible passage, or question" required/><button type="submit">Search sermons <span aria-hidden="true">&gt;</span></button></div><small>Searches sermon titles, wikis, Scripture references, and transcripts.</small></form><a className="button dark" href="https://www.youtube.com/@abfpdx" target="_blank" rel="noreferrer">Explore ABF on YouTube <Arrow /></a></div>
+        <div className="studios-content"><p className="section-label">Watch · Learn · Explore</p><h2>Faith for the whole week.</h2><p>Watch sermons, teaching, commentary, and original video from the ABF community on our official YouTube channel.</p><a className="button dark" href="https://www.youtube.com/@abfpdx" target="_blank" rel="noreferrer">Explore ABF on YouTube <Arrow /></a></div>
       </section>
+
+      <SermonDiscovery />
 
       <section className="sundays" aria-labelledby="sundays-title">
         <div className="section-heading"><p className="section-label">Our monthly rhythm</p><h2 id="sundays-title">What are Sundays like?</h2><p>ABF does not follow one standard service format. Each part of the month creates a different way to worship, learn, serve, and connect.</p></div>
