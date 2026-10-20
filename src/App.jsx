@@ -10,6 +10,15 @@ const staffGroupDetails = {
   'Interns & Staff': { title: 'Interns & Staff', subtitle: 'Teachers · Volunteers' },
 }
 
+const teachingProfiles = {
+  'Josh McGary': 'https://teachings.abfpdx.org/?pastor=josh-mcgary',
+  'James Pierzina': 'https://teachings.abfpdx.org/?pastor=james-pierzina',
+  'Colin Sakewitz': 'https://teachings.abfpdx.org/?pastor=colin-sakewitz',
+  'Adam Kunkel': 'https://teachings.abfpdx.org/?pastor=adam-kunkel',
+  'Rev. Monte McGary': 'https://teachings.abfpdx.org/?pastor=monte-mcgary',
+  'Jacob Browning': 'https://teachings.abfpdx.org/?pastor=jacob-browning',
+}
+
 function MinistryIcon({ type }) {
   const common = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round' }
   return <div className={`ministry-icon icon-${type.toLowerCase()}`} aria-hidden="true">
@@ -108,6 +117,7 @@ function CommunityResourcesSection() {
 
 function StaffCard({ person }) {
   const [flipped, setFlipped] = useState(false)
+  const teachingProfile = teachingProfiles[person.name]
   return <div className={`staff-card${flipped ? ' is-flipped' : ''}`}>
     <div className="staff-card-inner">
       <button className="staff-face staff-front" type="button" aria-label={`Show biography and links for ${person.name}`} onClick={() => setFlipped(true)} tabIndex={flipped ? -1 : 0}>
@@ -118,7 +128,7 @@ function StaffCard({ person }) {
         <span className="staff-back-heading"><span className="staff-back-mark" aria-hidden="true">ABF</span><span><small>{person.role}</small><strong>{person.name}</strong></span></span>
         {person.playlist && flipped && <span className="staff-video-frame"><iframe src={`https://www.youtube-nocookie.com/embed/videoseries?list=${person.playlist}&autoplay=1&mute=1&playsinline=1&controls=0&disablekb=1&fs=0&iv_load_policy=3&modestbranding=1&rel=0`} title={`${person.name} YouTube playlist`} allow="autoplay; encrypted-media; picture-in-picture" loading="lazy" tabIndex="-1"/></span>} 
         <p>{person.bio}</p>
-        <span className="staff-actions">{person.email && <a href={`mailto:${person.email}`} tabIndex={flipped ? 0 : -1} aria-label={`Email ${person.name}`}>Email <Arrow /></a>}{person.playlist && <a href={`https://www.youtube.com/playlist?list=${person.playlist}`} target="_blank" rel="noreferrer" tabIndex={flipped ? 0 : -1}>YouTube <Arrow /></a>}{person.website && <a href={person.website} target="_blank" rel="noreferrer" tabIndex={flipped ? 0 : -1}>Website <Arrow /></a>}{person.spotify && <a href={person.spotify} target="_blank" rel="noreferrer" tabIndex={flipped ? 0 : -1}>Spotify <Arrow /></a>}<button className="staff-return" type="button" onClick={() => setFlipped(false)} tabIndex={flipped ? 0 : -1}>Return ↙</button></span>
+        <span className="staff-actions">{person.email && <a href={`mailto:${person.email}`} tabIndex={flipped ? 0 : -1} aria-label={`Email ${person.name}`}>Email <Arrow /></a>}{teachingProfile && <a href={teachingProfile} target="_blank" rel="noreferrer" tabIndex={flipped ? 0 : -1} aria-label={`Open ${person.name}’s teaching profile`}>Teaching Profile <Arrow /></a>}{person.playlist && <a href={`https://www.youtube.com/playlist?list=${person.playlist}`} target="_blank" rel="noreferrer" tabIndex={flipped ? 0 : -1}>YouTube <Arrow /></a>}{person.website && <a href={person.website} target="_blank" rel="noreferrer" tabIndex={flipped ? 0 : -1}>Website <Arrow /></a>}{person.spotify && <a href={person.spotify} target="_blank" rel="noreferrer" tabIndex={flipped ? 0 : -1}>Spotify <Arrow /></a>}<button className="staff-return" type="button" onClick={() => setFlipped(false)} tabIndex={flipped ? 0 : -1}>Return ↙</button></span>
       </div>
     </div>
   </div>
